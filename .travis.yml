@@ -1,0 +1,21 @@
+sudo: required
+services:
+    - docker
+
+ before_install:
+    - docker build -t shansivam/react-test -f ./client/Dockerfile.dev  ./client
+
+  script:
+    - docker run -e CI=true shansivam/react-test npm test
+
+after_success:
+    - docker build -t shansivam/multi-client ./client
+    - docker build -t shansivam/multi-nginx ./nginx
+    - docker build -t shansivam/multi-server ./server
+    - docker build -t shansivam/multi-worker ./worker
+
+    - docker login -u $DOCKER_ID -p $DOCKER_PASSWORD
+    - docker push shansivam/multi-client
+    - docker push shansivam/multi-nginx
+    - docker push shansivam/multi-server
+    - docker push shansivam/multi-worker
